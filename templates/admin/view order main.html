@@ -1,0 +1,41 @@
+{% extends 'admin/admin_temp.html' %}
+{%  block body %}
+<form id="form1" name="form1" method="post" action="/ordermain_post">
+<h2 align="center">View Order Main</h2>
+
+  <div align="center">
+  <table class="table table-bordered">
+      <tr>
+          <td>From date<input type="date" value="" name="d1" class="form-control"/></td>
+          <td>to date<input type="date" value="" name="d2" class="form-control"/></td>
+          <td><input type="submit" value="go" class="btn btn-outline-success" /></td>
+
+      </tr>
+
+  </table>
+    <table width="449" border="1" class="table table-bordered">
+      <tr>
+        <th width="66" scope="col">Sno</th>
+        <th width="86" scope="col">Date</th>
+        <th width="151" scope="col">UserInfo</th>
+        <th width="47" scope="col">Total</th>
+        <th width="65" scope="col">&nbsp;</th>
+      </tr>
+      <tr>
+          {% for i in data %}
+        <td height="78">{{ loop.index }}</td>
+        <td>&nbsp;{{ i['date'] }}</td>
+        <td>{{ i['name'] }}<br> {{ i['place'] }} <br> {{ i['pin'] }}<br>{{ i['post'] }}<br>{{ i['phoneno'] }}<br>{{ i['email'] }}<br>{{ i['distrcit'] }}</td>
+        <td>&nbsp;{{ i['totalamt'] }}</td>
+        <td><a href="/viewordersub/{{ i['omid'] }}">More</a></td>
+      </tr>
+        {% endfor %}
+    </table>
+    <br />
+    <br />
+    
+  </div>
+</form>
+{% endblock %}
+
+

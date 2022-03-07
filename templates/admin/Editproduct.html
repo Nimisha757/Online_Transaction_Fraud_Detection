@@ -1,0 +1,44 @@
+{% extends 'admin/admin_temp.html' %}
+{% block body %}
+<form action="/editproduct_post" method="post" enctype="multipart/form-data" name="form1" id="form1">
+
+<h2 align="center">EDIT PRODUCT </h2>
+  <div align="center">
+    <table width="200" border="0" class="table table-bordered">
+      <tr>
+        <th scope="row">Category</th>
+        <td><select name="cat3" id="fileField" class="form-control">
+            {% for i in cat %}
+                <option value="{{ i["catid"] }}">{{ i["catname"] }}</option>
+            {% endfor %}
+            <option></option>
+        </select></td>
+      </tr>
+      <tr>
+        <th scope="row"><div align="left">Product<input type="hidden" name="po_id" value="{{ data['productid'] }}" class=" form-control"></div></th>
+        <td><p>
+          <label for="textfield2"></label>
+          <input type="text" name="textfield2" id="textfield2" value="{{ data['productname'] }}" class="form-control"/>
+        </p></td>
+      </tr>
+      <tr>
+        <th scope="row"> <div align="left">Price </div></th>
+        <td><p>
+          <label for="textfield3"></label>
+          <input type="text" name="textfield3" id="textfield3" value="{{ data['price'] }}" class="form-control" />
+        </p></td>
+      </tr>
+      <tr>
+        <th scope="row"><div align="left">Image</div></th>
+        <td><p>
+          <label for="fileField"></label>
+          <input type="file" name="fileField" id="fileField" class="form-control"/>
+        </p></td>
+      </tr>
+      <tr>
+        <th colspan="2" scope="row"><input type="submit" name="button" id="button" value="Edit" class="btn btn-outline-success"/></th>
+      </tr>
+    </table>
+  </div>
+</form>
+{% endblock %}

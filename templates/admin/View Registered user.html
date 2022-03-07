@@ -1,0 +1,33 @@
+{%  extends 'admin/admin_temp.html' %}
+{% block body %}
+<form id="form1" name="form1" method="post" action="">
+<h2 align="center">View Registered Users</h2>
+  <div align="center">
+    <table width="546" border="1" class=" table table-bordered">
+      <tr>
+          <th>Sl no</th>
+        <th height="29" scope="col">Username</th>
+        <th scope="col">Place</th>
+        <th scope="col">Pin</th>
+        <th scope="col">Post</th>
+        <th scope="col">Phone NO</th>
+        <th scope="col">Email</th>
+        <th scope="col">Image</th>
+      </tr>
+        {% for i in data %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>&nbsp;{{ i['name'] }}</td>
+        <td>&nbsp;{{i['place']}}</td>
+        <td>&nbsp;{{i['pin']}}</td>
+        <td>{{i['post']}}&nbsp;</td>
+        <td>{{i['phoneno']}}&nbsp;</td>
+        <td>{{i['email']}}&nbsp;</td>
+        <td><img src="{{ i['image'] }}"></td>
+      </tr>
+        {% endfor %}
+    </table>
+  </div>
+</form>
+
+{% endblock %}

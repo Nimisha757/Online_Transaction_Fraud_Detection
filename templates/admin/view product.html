@@ -1,0 +1,46 @@
+{% extends 'admin/admin_temp.html' %}
+{% block body %}
+<form id="form1" name="form1" method="post" action="/viewproduct_post">
+<h2 align="center">View Product</h2>
+<p align="center">&nbsp;</p>
+  <div align="center">
+    <table width="358" border="0" class="table table-bordered" >
+      <tr>
+        <th width="93" scope="col">Product</th>
+        <th width="" scope="col"><label for="textfield"></label>
+          <label for="textfield2"></label>
+          <input type="text" name="textfield" id="textfield2" required  class="form-control" />
+<label for="select"></label></th>
+        <th width="75" scope="col"><input type="submit" name="button" id="button" value="GO"  class=" btn btn-outline-success"/></th>
+      </tr>
+    </table>
+    <br /><br />
+    <table width="556" border="1" class=" table table-bordered">
+      <tr>
+        <th width="93" scope="col">Sno</th>
+          <td>category</td>
+        <th width="93" scope="col">Name</th>
+
+        <th width="93" scope="col">Price</th>
+        <th width="168" scope="col">Image</th>
+        <th width="75" scope="col">&nbsp;</th>
+      </tr>
+
+      <tr>
+          {%for i in data%}
+          <td>{{ loop.index }}</td>
+              <td>{{ i["catname"] }}</td>
+          <td>{{ i['productname'] }}</td>
+          <td>{{ i['price'] }}</td>
+          <td><img src="{{ i['pimage'] }}"></td>
+
+        <th scope="col"><p><a href="/deleteproduct/{{ i['productid'] }}">Delete</a></p>
+          <p><a href="/editproduct/{{ i['productid'] }}">Edit</a></p></th>
+
+      </tr>
+         {% endfor %}
+    </table>
+  </div>
+</form>
+{% endblock %}
+

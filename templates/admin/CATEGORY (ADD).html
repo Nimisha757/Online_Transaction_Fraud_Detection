@@ -1,0 +1,20 @@
+{% extends 'admin/admin_temp.html' %}
+{% block body %}
+<form id="form1" name="form1" method="post" action="/add_category_post">
+<h2 align="center"> CATEGORY</h2>
+  <div align="center">
+      <table class="table table-bordered">
+
+      <tr>
+        <th width="191" scope="row">CATEGORY</th>
+        <td width="189"><input type="text" value="" name="cat" required class=" form-control" /></td>
+      </tr>
+      <tr>
+          <td></td>
+        <th height="36" colspan="2" scope="row"><input type="submit" name="button" id="button" value="ADD" class="btn btn-outline-success"/></th>
+      </tr>
+    </table>
+  </div>
+  <div align="center"></div>
+</form>
+{% endblock %}

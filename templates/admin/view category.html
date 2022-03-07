@@ -1,0 +1,37 @@
+{% extends 'admin/admin_temp.html' %}
+
+{% block body %}
+<form id="form1" name="form1" method="post" action="/viewcat_post">
+<h2 align="center">View Category</h2>
+<p align="center">&nbsp;</p>
+  <div align="center">
+    <table width="358" border="0" class="table table-bordered">
+      <tr>
+        <th width="93" scope="col">Category</th>
+        <th><input type="text" name="textfield" required class="form-control"></th>
+        <th width="75" scope="col"><input type="submit" name="button" id="button" value="GO"  class="btn btn-outline-success"/></th>
+      </tr>
+    </table>
+    <br /><br />
+    
+    <table width="354" height="96" border="1" class="table table-bordered">
+      <tr>
+        <th width="80" scope="col">Sno</th>
+        <th width="80" scope="col">Category</th>
+        <th width="41" scope="col">&nbsp;</th>
+      </tr>
+      <tr>
+          {% for i in data %}
+        <td>&nbsp;{{ loop.index }}</td>
+
+        <td>&nbsp;{{ i['catname']}}</td>
+        <td><p align="center"><a href="/deletecategory/{{ i['catid'] }}"> Delete</a></p>
+        <p align="center"><a href="/editcategory/{{ i['catid'] }}">Edit</a></p></td>
+
+      </tr>
+        {% endfor %}
+    </table>
+  </div>
+</form>
+{% endblock %}
+

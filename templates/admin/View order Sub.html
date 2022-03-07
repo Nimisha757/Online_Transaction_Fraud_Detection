@@ -1,0 +1,28 @@
+
+{%  extends 'admin/admin_temp.html' %}
+{% block body %}
+<form id="form1" name="form1" method="post" action="">
+<h2 align="center">View Order Sub</h2>
+
+  <div align="center">
+
+<table width="378" border="1" class="table table-bordered">
+      <tr>
+        <th width="66" scope="col">Sno</th>
+        <th width="86" scope="col">PInfo</th>
+        <th width="151" scope="col">Quantity</th>
+        <th width="47" scope="col">Amount</th>
+      </tr>
+      <tr>
+          {% for i in data %}
+        <td height="78">{{ loop.index }}</td>
+        <td>{{ i['productname'] }}<br>{{ i['price'] }}<br><img src="{{ i['pimage'] }}"></td>
+        <td>&nbsp;{{ i['os_quantity'] }}</td>
+        <td>&nbsp;{{ i['os_quantity'] * i['price'] }}</td>
+      </tr>
+    {% endfor %}
+    </table>
+    </div>
+</form>
+{% endblock %}
+
