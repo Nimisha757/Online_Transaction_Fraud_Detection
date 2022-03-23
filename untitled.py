@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, session
+import time
+
+from flask import Flask, render_template, request, session,jsonify
 from dbconnection import Db
 
 app = Flask(__name__)
@@ -12,23 +14,20 @@ def login():
 
 @app.route('/login_post',methods=['post'])
 def login_post():
-
-        us=request.form['textfield']
-        ps=request.form['textfield2']
-        qry="SELECT * FROM `login` WHERE `username`='"+us+"' AND `password`='"+ps+"'"
-        d=Db()
-        res= d.selectOne(qry)
-        if res!='':
-            session['l_id']=res['lid']
-            type=res['type']
-
-            if type=='admin':
-                return '''<script>alert('success');window.location='/adminhome'</script>'''
-
-            else:
-                return '''<script>alert('invalid');window.location='/login'</script>'''
+    us=request.form['textfield']
+    ps=request.form['textfield2']
+    qry="SELECT * FROM `login` WHERE `username`='"+us+"' AND `password`='"+ps+"'"
+    d=Db()
+    res= d.selectOne(qry)
+    if res!='':
+        session['l_id']=res['lid']
+        type=res['type']
+        if type=='admin':
+            return '''<script>alert('success');window.location='/adminhome'</script>'''
         else:
             return '''<script>alert('invalid');window.location='/login'</script>'''
+    else:
+        return '''<script>alert('invalid');window.location='/login'</script>'''
 
 
 
@@ -214,6 +213,123 @@ def viewusers():
     res=d.select(qry)
     return render_template("admin/View Registered user.html",data=res)
 
+# ----------------------------------Android-------
+
+@app.route("/and_login_post",methods=['POST'])
+def and_login_post():
+    d=Db()
+
+    username=request.form['uname']
+    password=request.form['psw']
+    qry = "SELECT * FROM `login` WHERE `username`='" + username + "' AND `password`='" + password + "'"
+    res=d.selectOne(qry)
+    if res is not None:
+        if res["type"]=="user":
+            return jsonify(status="ok",lid=res["lid"])
+        else:
+            return jsonify(status="no")
+    else:
+        return jsonify(status="no")
+
+
+@app.route("/and_signup",methods=['POST'])
+def and_signup():
+    d=Db()
+    use = request.form['name']
+    place = request.form['place']
+    pin = request.form['pin']
+    post = request.form['post']
+    phone = request.form['phone']
+    email = request.form['email']
+    password=request.form['password']
+    image = request.form['photo']
+    import base64
+
+    timestr = time.strftime("%Y%m%d-%H%M%S")
+    print(timestr)
+    a = base64.b64decode(image)
+    fh = open("C:\\Users\hp\\PycharmProjects\\untitled\\static\\userimg\\" + timestr + ".jpg", "wb")
+    path = "/static/userimg/" + timestr + ".jpg"
+    fh.write(a)
+    fh.close()
+
+    qry="INSERT INTO  `login` (`username`,`password`,`type`) VALUES('"+use+"','"+password+"','user')"
+    db=Db()
+    lid=str(db.insert(qry))
+
+
+    qry="INSERT INTO `registration`(lid,name,place,pin,post,phoneno,email,image)VALUES('"+lid+"','"+use+"','"+place+"','"+pin+"','"+post+"','"+phone+"','"+email+"','"+path+"')"
+    res=d.insert(qry)
+    return  jsonify(status="ok")
+
+@app.route("/and_productview",methods=['POST'])
+def and_productview():
+    d=Db()
+
+    catid=request.form['catid']
+    qry="SELECT `product`.*,category.* FROM `category` INNER JOIN `product` ON  `category`.catid=`product`.`catid` WHERE  category.catid='"+catid+"'"
+    res=d.select(qry)
+    return jsonify(status="ok",users=res)
+
+
+@app.route("/categoryview",methods=['POST'])
+def categoryview():
+    d=Db()
+    qry="SELECT * from category"
+    res=d.select(qry)
+    return jsonify(status="ok",users=res)
+
+
+@app.route("/and_cartview",methods=['POST'])
+def and_cartview():
+    d=Db()
+    lid=request.form['lid']
+    qry="SELECT `cart`.*,`product`.*,category.* FROM `product` INNER  JOIN cart ON `product`.`productid`=`cart`.`productid` INNER JOIN category ON product.catid=category.catid  WHERE  lid='"+lid+"'"
+    res=d.select(qry)
+    print(qry)
+
+    print(res)
+    # qr = "DELETE FROM `cart` WHERE `cartid`='" + lid + "'"
+    # res = d.delete(qr)
+    return jsonify(status="ok",users=res)
+
+@app.route("/and_purchasehistory",methods=['POST'])
+def and_purchasehistory():
+    d=Db()
+    lid=request.form['lid']
+    qry="SELECT * FROM `orderrmain` where omid='"+lid+"'"
+    res=d.select(qry)
+    print(qry)
+    return  jsonify(status="ok",users=res)
+
+
+
+
+@app.route("/and_profileview",methods=['POST'])
+def and_profileview():
+    lid=request.form['lid']
+    d=Db()
+    qry="SELECT * FROM `registration` WHERE lid='"+lid+"'"
+    res=d.selectOne(qry)
+    print(qry)
+    print(res)
+    return  jsonify(status="ok",name=res["name"],place=res["place"],pin=res["pin"],post=res["post"],phoneNo=res["phoneno"],email=res["email"],image=res["image"])
+@app.route("/add_cartadd",methods=['POST'])
+def add_cartadd():
+    c=request.form['lid']
+    p=request.form['pid']
+    qty=request.form['qty']
+    pri=request.form['price']
+    # c1=request.form['cartid']
+    d=Db()
+    qry="INSERT INTO `cart`(`productid`,`quantity`,`lid`)VALUES('"+p+"','"+qty+"','"+c+"')"
+    res =d.insert(qry)
+
+    return jsonify(status="ok")
+
+
+
+
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True, host="0.0.0.0")
