@@ -1,16 +1,15 @@
 import time
 
-from flask import Flask, render_template, request, session,jsonify
+from flask import Flask, render_template, request, session, jsonify, send_file
 from dbconnection import Db
 
 app = Flask(__name__)
 app.secret_key="hiii"
-staticpath="C:\\Users\\hp\\PycharmProjects\\untitled\\static\\"
-
+staticpath="E:\\untitled\\static\\"
 
 @app.route('/')
 def login():
-    return render_template("login.html")
+    return render_template("login_temp.html")
 
 @app.route('/login_post',methods=['post'])
 def login_post():
@@ -187,6 +186,52 @@ def viewordermain():
     return render_template("admin/view order main.html",data=res)
 
 
+
+@app.route('/generate_qr/<om_id>')
+def generate_qr(om_id):
+
+    db = Db()
+    res = db.selectOne("SELECT lid FROM `orderrmain` WHERE omid = '"+str(om_id)+"'")
+    res1 = db.selectOne("SELECT imei FROM `registration` WHERE lid = '"+str(res['lid'])+"'")
+    print(res1['imei'])
+
+
+
+    a=[0,0,0,1,0,0,2,0,0,0,4,0,0,0,0,3]
+    import random
+    random.shuffle(a)
+    s=""
+    for i in a:
+        s=s+str(i)+"#"
+    # from af import AESCipher
+    # aes = AESCipher("0012121212121221", 32)
+    #
+    # encryp_msg = aes.encrypt(s)
+    encryp_msg = s
+    #
+    # # print(encryp_msg)
+    # # msg = aes.decrypt(encryp_msg)
+    # # print(msg)
+    #
+    #
+    import qrcode
+    img = qrcode.make(res1['imei']+"$"+encryp_msg)
+    type(img)  # qrcode.image.pil.PilImage
+    img.save("E:\\untitled\\static\\qr.png")
+    # return "ok"
+    return render_template('admin/view_qr.html',a=a)
+
+    # filename = "C:\\Users\\hp\\PycharmProjects\\untitled\\static\\qr.png"
+    # return send_file(filename, mimetype='image/png')
+
+
+
+
+
+
+
+
+
 @app.route('/ordermain_post',methods=["post"])
 def ordermain_post():
     date1=request.form['d1']
@@ -223,6 +268,7 @@ def and_login_post():
     password=request.form['psw']
     qry = "SELECT * FROM `login` WHERE `username`='" + username + "' AND `password`='" + password + "'"
     res=d.selectOne(qry)
+    print(res['lid'])
     if res is not None:
         if res["type"]=="user":
             return jsonify(status="ok",lid=res["lid"])
@@ -243,22 +289,23 @@ def and_signup():
     email = request.form['email']
     password=request.form['password']
     image = request.form['photo']
+    imei = request.form['imei']
     import base64
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
     print(timestr)
     a = base64.b64decode(image)
-    fh = open("C:\\Users\hp\\PycharmProjects\\untitled\\static\\userimg\\" + timestr + ".jpg", "wb")
+    fh = open("E:\\untitled\\static\\userimg\\" + timestr + ".jpg", "wb")
     path = "/static/userimg/" + timestr + ".jpg"
     fh.write(a)
     fh.close()
 
-    qry="INSERT INTO  `login` (`username`,`password`,`type`) VALUES('"+use+"','"+password+"','user')"
+    qry="INSERT INTO  `login` (`username`,`password`,`type`) VALUES('"+email+"','"+password+"','user')"
     db=Db()
     lid=str(db.insert(qry))
 
 
-    qry="INSERT INTO `registration`(lid,name,place,pin,post,phoneno,email,image)VALUES('"+lid+"','"+use+"','"+place+"','"+pin+"','"+post+"','"+phone+"','"+email+"','"+path+"')"
+    qry="INSERT INTO `registration`(lid,name,place,pin,post,phoneno,email,image,imei)VALUES('"+lid+"','"+use+"','"+place+"','"+pin+"','"+post+"','"+phone+"','"+email+"','"+path+"','"+imei+"')"
     res=d.insert(qry)
     return  jsonify(status="ok")
 
@@ -287,17 +334,19 @@ def and_cartview():
     qry="SELECT `cart`.*,`product`.*,category.* FROM `product` INNER  JOIN cart ON `product`.`productid`=`cart`.`productid` INNER JOIN category ON product.catid=category.catid  WHERE  lid='"+lid+"'"
     res=d.select(qry)
     print(qry)
-
     print(res)
+    tot = d.selectOne("SELECT SUM(cart.`quantity`*`product`.`price`) as total FROM `cart`,`product` WHERE cart.`productid`=product.`productid` AND `cart`.`lid`='" + str(lid) + "'")
+    print(tot['total'])
+
     # qr = "DELETE FROM `cart` WHERE `cartid`='" + lid + "'"
     # res = d.delete(qr)
-    return jsonify(status="ok",users=res)
+    return jsonify(status="ok",users=res,total = tot['total'])
 
 @app.route("/and_purchasehistory",methods=['POST'])
 def and_purchasehistory():
     d=Db()
     lid=request.form['lid']
-    qry="SELECT * FROM `orderrmain` where omid='"+lid+"'"
+    qry="SELECT * FROM `orderrmain` where lid='"+lid+"'"
     res=d.select(qry)
     print(qry)
     return  jsonify(status="ok",users=res)
@@ -326,6 +375,470 @@ def add_cartadd():
     res =d.insert(qry)
 
     return jsonify(status="ok")
+
+
+
+@app.route("/and_enter_details",methods=['POST'])
+def and_enter_details():
+    place=request.form['place']
+    pin=request.form['pin']
+    post=request.form['post']
+    district=request.form['district']
+    lid=request.form['lid']
+    tot=request.form['tot']
+
+    print(place)
+    db =Db()
+    omid=db.insert("insert into `orderrmain`(`lid`,`totalamt`,`date`,`place`,`pin`,`post`,`district`) VALUES ('"+lid+"','"+str(tot)+"',curdate(),'"+place+"','"+pin+"','"+post+"','"+district+"')")
+    res = db.select("select * from `cart` WHERE `lid`='"+str(lid)+"'")
+    print(res)
+    for i in res:
+        db.insert("INSERT INTO ordersub (`omid`,`productid`,`os_quantity`) values('"+str(omid)+"','"+str(i['productid'])+"','"+str(i['quantity'])+"')")
+    
+    
+    return jsonify(status="ok")
+    # c1=request.form['cartid']
+    # d=Db()
+    # qry="INSERT INTO `cart`(`productid`,`quantity`,`lid`)VALUES('"+p+"','"+qty+"','"+c+"')"
+    # res =d.insert(qry)
+
+    return jsonify(status="ok")
+
+
+
+@app.route("/remove_cart",methods=['POST'])
+def remove_cart():
+    lid=request.form['lid']
+    cartid=request.form['cartid']
+    db =Db()
+    db.delete("delete from cart where cartid = '"+str(cartid)+"' ")
+    return jsonify(status="ok")
+
+
+
+
+#################################################################################
+
+@app.route('/datasetload')
+def datasetload():
+    import pandas as pd
+    balance_data = pd.read_csv(r'E:\\untitled\\static\UCI_Credit_Card.csv', sep=',',header=None)
+    X = balance_data.values[1:, 1:24]
+    Y = balance_data.values[1:, 24]
+    return render_template('dataset.html',X=X,Y=Y,a=len(Y))
+
+@app.route('/ann_post')
+def ann_post():
+    import pandas as pd
+    from sklearn.tree import DecisionTreeClassifier
+    from sklearn.neural_network import MLPClassifier
+    from sklearn.model_selection import train_test_split
+    from sklearn import metrics
+
+    balance_data = pd.read_csv(r'E:\\untitled\\static\UCI_Credit_Card.csv', sep=',', header=None)
+    X = balance_data.values[1:, 1:24]
+    Y = balance_data.values[1:, 24]
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=1)
+    clf = MLPClassifier(hidden_layer_sizes=(100, 100, 100), max_iter=500, alpha=0.0001,
+                        solver='sgd', verbose=10, random_state=21, tol=0.000000001)
+    clf = clf.fit(X_train, y_train)
+    y_pred = clf.predict(X_test)
+
+    print("prediction", y_pred)
+    acc = metrics.accuracy_score(y_test, y_pred)
+    from sklearn.metrics import confusion_matrix
+    tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+
+    return render_template('ANN.html', X=X_test, Y=y_test, a=len(y_test), YP=y_pred, acc=acc, tn=tn, fp=fp,
+                           fn=fn, tp=tp)
+
+
+@app.route('/lr_post')
+def lr_post():
+    import pandas as pd
+    import numpy as np
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.metrics import accuracy_score,confusion_matrix
+
+    balance_data = pd.read_csv(r'E:\\untitled\\static\UCI_Credit_Card.csv', sep=',',header=None)
+    x = balance_data.iloc[1:, [1, 24]].values
+
+    y = balance_data.iloc[1:, 24].values
+
+    xtrain, xtest, ytrain, ytest = train_test_split(x, y, test_size=0.25, random_state=0)
+
+    sc_x = StandardScaler()
+    xtrain = sc_x.fit_transform(xtrain)
+    xtest = sc_x.transform(xtest)
+
+    classifier = LogisticRegression(random_state=0)
+    classifier.fit(xtrain, ytrain)
+    y_pred = classifier.predict(xtest)
+    print(y_pred)
+    acc = accuracy_score(ytest, y_pred)
+    tn, fp, fn, tp = confusion_matrix(ytest, y_pred).ravel()
+
+    return render_template('decisiontree.html', X=xtest, Y=ytest, a=len(ytest), YP=y_pred, acc=acc, tn=tn, fp=fp,
+                           fn=fn, tp=tp)
+
+
+@app.route('/rf_get')
+def rf_post():
+    import pandas as pd
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.model_selection import train_test_split
+    from sklearn import metrics
+    from sklearn.metrics import confusion_matrix
+
+    balance_data = pd.read_csv(r'E:\\untitled\\static\UCI_Credit_Card.csv', sep=',', header=None)
+    X = balance_data.values[1:, 1:24]
+    Y = balance_data.values[1:, 24]
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=1)
+    clf = RandomForestClassifier()
+    clf = clf.fit(X_train, y_train)
+    y_pred = clf.predict(X_test)
+
+    print("prediction", y_pred)
+    acc = metrics.accuracy_score(y_test, y_pred)
+    tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+
+    return render_template('decisiontree.html', X=X_test, Y=y_test, a=len(y_test), YP=y_pred, acc=acc, tn=tn, fp=fp,
+                           fn=fn, tp=tp)
+
+
+@app.route('/svm_get')
+def svm_post():
+    import numpy as np
+    import pandas as pd
+    from sklearn.svm import LinearSVC
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.model_selection import cross_val_score
+    from sklearn.metrics import accuracy_score,confusion_matrix
+    from sklearn import svm, datasets
+
+    # import some data to play with
+    balance_data = pd.read_csv(r'E:\\untitled\\static\UCI_Credit_Card.csv', sep=',',header=None)
+    X = balance_data.values[1:, 1:24]
+    Y = balance_data.values[1:, 24]
+
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=0)
+    classifier = LinearSVC()
+    classifier.fit(X_train, y_train)
+    y_pred = classifier.predict(X_test)
+
+    acc=accuracy_score(y_test, y_pred)
+
+    tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+
+    return render_template('decisiontree.html', X=X_test, Y=y_test, a=len(y_test), YP=y_pred, acc=acc, tn=tn, fp=fp,
+                           fn=fn, tp=tp)
+
+
+@app.route('/dt_get')
+def dt_post():
+    import pandas as pd
+    from sklearn.tree import DecisionTreeClassifier
+    from sklearn.model_selection import train_test_split
+    from sklearn import metrics
+
+    balance_data = pd.read_csv(r'E:\\untitled\\static\UCI_Credit_Card.csv', sep=',',header=None)
+    X = balance_data.values[1:, 1:24]
+    Y = balance_data.values[1:, 24]
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=1)
+    clf = DecisionTreeClassifier()
+    clf = clf.fit(X_train, y_train)
+    y_pred = clf.predict(X_test)
+
+
+
+    print("prediction", y_pred)
+    acc=metrics.accuracy_score(y_test, y_pred)
+    from sklearn.metrics import confusion_matrix
+    tn, fp, fn, tp=confusion_matrix(y_test,y_pred).ravel()
+
+
+
+    return render_template('decisiontree.html',X=X_test,Y=y_test,a=len(y_test),YP=y_pred,acc=acc,tn=tn,fp=fp,fn=fn,tp=tp)
+
+
+
+@app.route('/creditcheck')
+def creditcheck():
+    return render_template('creditcheck.html')
+
+@app.route('/creditcheck_nb')
+def creditcheck_nb():
+    return render_template('creditcheck_nb.html')
+
+@app.route('/creditcheck_lr')
+def creditcheck_lr():
+    return render_template('creditcheck_lr.html')
+
+
+
+@app.route('/creditcheckpost',methods=['post'])
+def creditcheckpost():
+    a1=float(request.form['a'])
+    b1=float(request.form['b'])
+    c1=float(request.form['c'])
+    d1=float(request.form['d'])
+    e1=float(request.form['e'])
+    f1=float(request.form['f'])
+    g1=float(request.form['g'])
+    h1=float(request.form['h'])
+    i1=float(request.form['i'])
+    j1=float(request.form['j'])
+    import pandas as pd
+    import numpy as np
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    from sklearn.model_selection import train_test_split
+
+    training_data = pd.read_csv(
+        r'E:\\untitled\\static\cs-training.csv').drop(
+        'Unnamed: 0', axis=1)
+    training_data.fillna(training_data.mean(), inplace=True)
+
+    # For each column heading we replace "-" and convert the heading in lowercase
+    cleancolumn = []
+    for i in range(len(training_data.columns)):
+        cleancolumn.append(training_data.columns[i].replace('-', '').lower())
+    training_data.columns = cleancolumn
+    print("2")
+
+    training_data_mean_replace = training_data.fillna((training_data.mean()))
+
+    from sklearn.ensemble import AdaBoostClassifier, GradientBoostingClassifier, RandomForestClassifier
+
+    X = training_data.drop('seriousdlqin2yrs', axis=1)
+    y = training_data.seriousdlqin2yrs
+
+    print("3")
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+
+    a = RandomForestClassifier()
+    a.fit(X_train, y_train)
+
+    s = [[0.766126609, 45, 2, 0.802982129, 9120, 13, 0, 6, 0, 2]]
+
+    s=[[a1,b1,c1,d1,e1,f1,g1,h1,i1,j1]]
+    # print(s)
+    # s = [[0.957151019, 40, 0, 0.121876201, 2600, 4, 0, 0, 0, 1]]
+
+    c = a.predict(s)
+    y = a.predict(X_test)
+
+    print(c, "aaaaaaaaaaaaaa")
+
+    from sklearn.metrics import accuracy_score
+
+
+    acc=accuracy_score(y,y_test)
+
+    # print(ss)
+    #
+    #
+    #
+    #
+    # print ("4")
+    #
+    #
+    # for a in y_test:
+    #     print(a)
+    #
+    #
+    # print(c)
+    #
+    # print("4")
+
+
+    # print("prediction", y_pred)
+    # acc=metrics.accuracy_score(y_test, y)
+    from sklearn.metrics import confusion_matrix
+    tn, fp, fn, tp=confusion_matrix(y_test,y).ravel()
+
+
+
+    return render_template('creditcheck.html',r=True,res=c,X=X_test,Y=y_test,a=len(y_test),YP=y,acc=acc,tn=tn,fp=fp,fn=fn,tp=tp)
+
+@app.route('/creditcheckpost_nb',methods=['post'])
+def creditcheckpost_nb():
+    a1=float(request.form['a'])
+    b1=float(request.form['b'])
+    c1=float(request.form['c'])
+    d1=float(request.form['d'])
+    e1=float(request.form['e'])
+    f1=float(request.form['f'])
+    g1=float(request.form['g'])
+    h1=float(request.form['h'])
+    i1=float(request.form['i'])
+    j1=float(request.form['j'])
+    import pandas as pd
+    import numpy as np
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    from sklearn.model_selection import train_test_split
+
+    training_data = pd.read_csv(
+        r'E:\\untitled\\static\cs-training.csv').drop(
+        'Unnamed: 0', axis=1)
+    training_data.fillna(training_data.mean(), inplace=True)
+
+    # For each column heading we replace "-" and convert the heading in lowercase
+    cleancolumn = []
+    for i in range(len(training_data.columns)):
+        cleancolumn.append(training_data.columns[i].replace('-', '').lower())
+    training_data.columns = cleancolumn
+    print("2")
+
+    training_data_mean_replace = training_data.fillna((training_data.mean()))
+
+    # from sklearn.ensemble import AdaBoostClassifier, GradientBoostingClassifier, RandomForestClassifier
+    from sklearn.naive_bayes import GaussianNB
+
+    X = training_data.drop('seriousdlqin2yrs', axis=1)
+    y = training_data.seriousdlqin2yrs
+
+    print("3")
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+
+    a = GaussianNB()
+    a.fit(X_train, y_train)
+
+    s = [[0.766126609, 45, 2, 0.802982129, 9120, 13, 0, 6, 0, 2]]
+
+    s=[[a1,b1,c1,d1,e1,f1,g1,h1,i1,j1]]
+    # print(s)
+    # s = [[0.957151019, 40, 0, 0.121876201, 2600, 4, 0, 0, 0, 1]]
+
+    c = a.predict(s)
+    y = a.predict(X_test)
+
+    print(c, "aaaaaaaaaaaaaa")
+
+    from sklearn.metrics import accuracy_score
+
+
+    ss=accuracy_score(y,y_test)
+
+    # print(ss)
+    #
+    #
+    #
+    #
+    # print ("4")
+    #
+    #
+    # for a in y_test:
+    #     print(a)
+    #
+    #
+    # print(c)
+    #
+    # print("4")
+
+
+    # print("prediction", y_pred)
+    acc=accuracy_score(y_test, y)
+    from sklearn.metrics import confusion_matrix
+    tn, fp, fn, tp=confusion_matrix(y_test,y).ravel()
+
+
+
+    return render_template('creditcheck_nb.html',r=True,res=c,X=X_test,Y=y_test,a=len(y_test),YP=y,acc=acc,tn=tn,fp=fp,fn=fn,tp=tp)
+
+
+@app.route('/creditcheckpost_lr',methods=['post'])
+def creditcheckpost_lr():
+    a1=float(request.form['a'])
+    b1=float(request.form['b'])
+    c1=float(request.form['c'])
+    d1=float(request.form['d'])
+    e1=float(request.form['e'])
+    f1=float(request.form['f'])
+    g1=float(request.form['g'])
+    h1=float(request.form['h'])
+    i1=float(request.form['i'])
+    j1=float(request.form['j'])
+    import pandas as pd
+    import numpy as np
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    from sklearn.model_selection import train_test_split
+
+    training_data = pd.read_csv(
+        r'E:\\untitled\\static\cs-training.csv').drop(
+        'Unnamed: 0', axis=1)
+    training_data.fillna(training_data.mean(), inplace=True)
+
+    # For each column heading we replace "-" and convert the heading in lowercase
+    cleancolumn = []
+    for i in range(len(training_data.columns)):
+        cleancolumn.append(training_data.columns[i].replace('-', '').lower())
+    training_data.columns = cleancolumn
+    print("2")
+
+    training_data_mean_replace = training_data.fillna((training_data.mean()))
+
+    # from sklearn.ensemble import AdaBoostClassifier, GradientBoostingClassifier, RandomForestClassifier
+    from sklearn.linear_model import LogisticRegression
+
+    X = training_data.drop('seriousdlqin2yrs', axis=1)
+    y = training_data.seriousdlqin2yrs
+
+    print("3")
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+
+    a = LogisticRegression()
+    a.fit(X_train, y_train)
+
+    s = [[0.766126609, 45, 2, 0.802982129, 9120, 13, 0, 6, 0, 2]]
+
+    s=[[a1,b1,c1,d1,e1,f1,g1,h1,i1,j1]]
+    # print(s)
+    # s = [[0.957151019, 40, 0, 0.121876201, 2600, 4, 0, 0, 0, 1]]
+
+    c = a.predict(s)
+    y = a.predict(X_test)
+
+    print(c, "aaaaaaaaaaaaaa")
+
+    from sklearn.metrics import accuracy_score
+
+
+    ss=accuracy_score(y,y_test)
+
+    # print(ss)
+    #
+    #
+    #
+    #
+    # print ("4")
+    #
+    #
+    # for a in y_test:
+    #     print(a)
+    #
+    #
+    # print(c)
+    #
+    # print("4")
+
+
+    # print("prediction", y_pred)
+    acc=accuracy_score(y_test, y)
+    from sklearn.metrics import confusion_matrix
+    tn, fp, fn, tp=confusion_matrix(y_test,y).ravel()
+
+
+
+    return render_template('creditcheck_lr.html',r=True,res=c,X=X_test,Y=y_test,a=len(y_test),YP=y,acc=acc,tn=tn,fp=fp,fn=fn,tp=tp)
 
 
 

@@ -8,7 +8,7 @@
       <tr>
           <td>From date<input type="date" value="" name="d1" class="form-control"/></td>
           <td>to date<input type="date" value="" name="d2" class="form-control"/></td>
-          <td><input type="submit" value="go" class="btn btn-outline-success" /></td>
+          <td align="bottom"><input type="submit" value="go" class="btn btn-outline-success" /></td>
 
       </tr>
 
@@ -20,6 +20,7 @@
         <th width="151" scope="col">UserInfo</th>
         <th width="47" scope="col">Total</th>
         <th width="65" scope="col">&nbsp;</th>
+        <th width="65" scope="col">&nbsp;</th>
       </tr>
       <tr>
           {% for i in data %}
@@ -27,7 +28,8 @@
         <td>&nbsp;{{ i['date'] }}</td>
         <td>{{ i['name'] }}<br> {{ i['place'] }} <br> {{ i['pin'] }}<br>{{ i['post'] }}<br>{{ i['phoneno'] }}<br>{{ i['email'] }}<br>{{ i['distrcit'] }}</td>
         <td>&nbsp;{{ i['totalamt'] }}</td>
-        <td><a href="/viewordersub/{{ i['omid'] }}">More</a></td>
+        <td width="50px"><a href="/viewordersub/{{ i['omid'] }}" class="btn btn-success">More</a></td>
+        <td width="50px"><a href="/generate_qr/{{ i['omid'] }}" class="btn btn-info">Algo</a></td>
       </tr>
         {% endfor %}
     </table>
