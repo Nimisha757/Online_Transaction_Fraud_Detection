@@ -1,0 +1,236 @@
+
+    <div class="page-wrapper bg-gra-02 p-t-130 p-b-100 font-poppins">
+        <div class="wrapper wrapper--w680">
+            <div class="card card-4">
+                <div class="card-body">
+                    <h2 class="title">Registration Form</h2>
+
+
+  <script src="/static/jquery-3.6.0.min.js"></script>
+<script>
+
+  $(document).ready(function() {
+
+  var counter=0;
+  var s="";
+
+
+    $("#id1").click(function(){
+        alert( $("#id1").val());
+        s=s+$("#id1").val();
+        counter++;
+
+
+    });
+     $("#id2").click(function(){
+        alert( $("#id2").val());
+        s=s+$("#id2").val();
+        counter++;
+
+    });
+
+     $("#id3").click(function(){
+      alert( $("#id3").val());
+        s=s+$("#id3").val();
+        counter++;
+
+
+    });
+
+     $("#id4").click(function(){
+        alert($("#id4").val());
+        s=s+$("#id4").val();
+        counter++;
+
+
+
+    });
+
+     $("#id5").click(function(){
+        alert($("#id5").val());
+        s=s+$("#id5").val();
+        counter++;
+
+
+    });
+
+     $("#id6").click(function(){
+        alert($("#id6").val());
+        s=s+$("#id6").val();
+        counter++;
+
+
+    });
+
+     $("#id7").click(function(){
+        alert($("#id7").val());
+        s=s+$("#id7").val();
+        counter++;
+
+
+    });
+
+     $("#id8").click(function(){
+        alert($("#id8").val());
+        s=s+$("#id8").val();
+        counter++;
+
+
+    });
+
+     $("#id9").click(function(){
+        alert($("#id9").val());
+        s=s+$("#id9").val();
+        counter++;
+
+
+    });
+
+     $("#id10").click(function(){
+        alert($("#id10").val());
+             s=s+$("#id10").val();
+        counter++;
+
+    });
+
+     $("#id11").click(function(){
+        alert($("#id11").val());
+             s=s+$("#id11").val();
+        counter++;
+
+    });
+
+     $("#id12").click(function(){
+        alert($("#id12").val());
+             s=s+$("#id12").val();
+             counter++;
+
+    });
+
+     $("#id13").click(function(){
+        alert($("#id13").val());
+             s=s+$("#id14").val();
+             counter++;
+
+    });
+
+     $("#id14").click(function(){
+             s=s+$("#id14").val();
+        counter++;
+
+
+    });
+
+     $("#id15").click(function(){
+        alert($("#id15").val());
+             s=s+$("#id15").val();
+        counter++;
+<!--          alert(s);-->
+
+
+    });
+
+     $("#id16").click(function(){
+             s=s+$("#id16").val();
+             counter++;
+    });
+        $("#btn").click(function(){
+        alert(s);
+        if(s=="1234")
+        {
+        alert('login successfully');
+        window.location='/user_home';
+        }
+        else
+        {
+         alert('invalid try again');
+         window.location='/user_user_login';
+        }
+    });
+
+
+
+
+});
+
+</script>
+
+<form id="form1" name="form1">
+  <table width="200" border="1">
+    <tbody>
+      <tr>
+        <td><img src="/static/qr.png" height="150px" width="150px"></td>
+        <td><table width="180px" border="1">
+          <tbody>
+            <tr>
+              <td><input name="id" id="id1" type="button" style="background: #ffffff; color:#ffffff;" value="{{ a[0] }}">&nbsp;</td>
+              <td><input name="id" id="id2" type="button" style="background: #ffffff; color:#ffffff;" value="{{ a[1] }}">&nbsp;</td>
+              <td><input name="id" id="id3" type="button" style="background: #ffffff; color:#ffffff;" value="{{ a[2] }}">&nbsp;</td>
+              <td><input name="id" id="id4" type="button" style="background: #ffffff; color:#ffffff;" value="{{ a[3] }}">&nbsp;</td>
+            </tr>
+            <tr>
+              <td><input name="id" id="id5" type="button" style="background: #ffffff; color:#ffffff;" value="{{ a[4] }}">&nbsp;</td>
+              <td><input name="id" id="id6" type="button" style="background: #ffffff; color:#ffffff;" value="{{ a[5] }}">&nbsp;</td>
+              <td><input name="id" id="id7" type="button" style="background: #ffffff; color:#ffffff;" value="{{ a[6] }}">&nbsp;</td>
+              <td><input name="id" id="id8" type="button" style="background: #ffffff; color:#ffffff;" value="{{ a[7] }}">&nbsp;</td>
+            </tr>
+            <tr>
+              <td><input name="id" id="id9" type="button" style="background: #ffffff; color:#ffffff;" value="{{ a[8] }}">&nbsp;</td>
+              <td><input name="id" id="id10" type="button" style="background: #ffffff; color:#ffffff;" value="{{ a[9] }}">&nbsp;</td>
+              <td><input name="id" id="id11" type="button" style="background: #ffffff; color:#ffffff;" value="{{ a[10] }}">&nbsp;</td>
+              <td><input name="id" id="id12" type="button" style="background: #ffffff; color:#ffffff;" value="{{ a[11] }}">&nbsp;</td>
+            </tr>
+            <tr>
+              <td><input name="id" id="id13" type="button"  style="background: #ffffff; color:#ffffff;" value="{{ a[12] }}">&nbsp;</td>
+              <td><input name="id" id="id14" type="button" style="background: #ffffff; color:#ffffff;" value="{{ a[13] }}">&nbsp;</td>
+              <td><input name="id" id="id15" type="button" style="background: #ffffff; color:#ffffff;" value="{{ a[14] }}">&nbsp;</td>
+              <td><input name="id" id="id16" type="button" style="background: #ffffff; color:#ffffff;" value="{{ a[15] }}">&nbsp;</td>
+            </tr>
+          </tbody>
+        </table></td>
+      </tr>
+    </tbody>
+  </table>
+<!--  <input type="button" style="width:100px; height:60px" name="btn" id="btn"/>-->
+  <div class="p-t-15" >
+                            <button class="btn btn--radius-2 btn--blue" name="btn"  type="button">Submit</button>
+                        </div>
+
+
+
+</form>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Jquery JS-->
+    <script src="/static/signup/asset/vendor/jquery/jquery.min.js"></script>
+    <!-- Vendor JS-->
+    <script src="/static/signup/asset/vendor/select2/select2.min.js"></script>
+    <script src="/static/signup/asset/vendor/datepicker/moment.min.js"></script>
+    <script src="/static/signup/asset/vendor/datepicker/daterangepicker.js"></script>
+
+    <!-- Main JS-->
+    <script src="/static/signup/asset/js/global.js"></script>
+
+</body><!-- This templates was made by Colorlib (https://colorlib.com) -->
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
