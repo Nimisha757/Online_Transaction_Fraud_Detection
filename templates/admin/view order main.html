@@ -20,7 +20,6 @@
         <th width="151" scope="col">UserInfo</th>
         <th width="47" scope="col">Total</th>
         <th width="65" scope="col">&nbsp;</th>
-        <th width="65" scope="col">&nbsp;</th>
       </tr>
       <tr>
           {% for i in data %}
@@ -29,7 +28,6 @@
         <td>{{ i['name'] }}<br> {{ i['place'] }} <br> {{ i['pin'] }}<br>{{ i['post'] }}<br>{{ i['phoneno'] }}<br>{{ i['email'] }}<br>{{ i['distrcit'] }}</td>
         <td>&nbsp;{{ i['totalamt'] }}</td>
         <td><a href="/viewordersub/{{ i['omid'] }}">More</a></td>
-        <td><a href="/generate_qr/{{ i['omid'] }}">Algo</a></td>
       </tr>
         {% endfor %}
     </table>

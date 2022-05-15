@@ -1,6 +1,6 @@
 import time
 
-from flask import Flask, render_template, request, session, jsonify, send_file
+from flask import Flask, render_template, request, session,jsonify
 from dbconnection import Db
 
 app = Flask(__name__)
@@ -10,7 +10,7 @@ staticpath="C:\\Users\\hp\\PycharmProjects\\untitled\\static\\"
 
 @app.route('/')
 def login():
-    return render_template("login_temp.html")
+    return render_template("login.html")
 
 @app.route('/login_post',methods=['post'])
 def login_post():
@@ -187,52 +187,6 @@ def viewordermain():
     return render_template("admin/view order main.html",data=res)
 
 
-
-@app.route('/generate_qr/<om_id>')
-def generate_qr(om_id):
-
-    db = Db()
-    res = db.selectOne("SELECT lid FROM `orderrmain` WHERE omid = '"+str(om_id)+"'")
-    res1 = db.selectOne("SELECT imei FROM `registration` WHERE lid = '"+str(res['lid'])+"'")
-    print(res1['imei'])
-
-
-
-    a=[0,0,0,1,0,0,2,0,0,0,4,0,0,0,0,3]
-    import random
-    random.shuffle(a)
-    s=""
-    for i in a:
-        s=s+str(i)+"#"
-    # from af import AESCipher
-    # aes = AESCipher("0012121212121221", 32)
-    #
-    # encryp_msg = aes.encrypt(s)
-    encryp_msg = s
-    #
-    # # print(encryp_msg)
-    # # msg = aes.decrypt(encryp_msg)
-    # # print(msg)
-    #
-    #
-    import qrcode
-    img = qrcode.make(res1['imei']+"$"+encryp_msg)
-    type(img)  # qrcode.image.pil.PilImage
-    img.save("C:\\Users\\hp\\PycharmProjects\\untitled\\static\\qr.png")
-    # return "ok"
-    return render_template('admin/view_qr.html',a=a)
-
-    # filename = "C:\\Users\\hp\\PycharmProjects\\untitled\\static\\qr.png"
-    # return send_file(filename, mimetype='image/png')
-
-
-
-
-
-
-
-
-
 @app.route('/ordermain_post',methods=["post"])
 def ordermain_post():
     date1=request.form['d1']
@@ -269,7 +223,6 @@ def and_login_post():
     password=request.form['psw']
     qry = "SELECT * FROM `login` WHERE `username`='" + username + "' AND `password`='" + password + "'"
     res=d.selectOne(qry)
-    print(res['lid'])
     if res is not None:
         if res["type"]=="user":
             return jsonify(status="ok",lid=res["lid"])
@@ -290,7 +243,6 @@ def and_signup():
     email = request.form['email']
     password=request.form['password']
     image = request.form['photo']
-    imei = request.form['imei']
     import base64
 
     timestr = time.strftime("%Y%m%d-%H%M%S")
@@ -306,7 +258,7 @@ def and_signup():
     lid=str(db.insert(qry))
 
 
-    qry="INSERT INTO `registration`(lid,name,place,pin,post,phoneno,email,image,imei)VALUES('"+lid+"','"+use+"','"+place+"','"+pin+"','"+post+"','"+phone+"','"+email+"','"+path+"','"+imei+"')"
+    qry="INSERT INTO `registration`(lid,name,place,pin,post,phoneno,email,image)VALUES('"+lid+"','"+use+"','"+place+"','"+pin+"','"+post+"','"+phone+"','"+email+"','"+path+"')"
     res=d.insert(qry)
     return  jsonify(status="ok")
 
@@ -335,13 +287,11 @@ def and_cartview():
     qry="SELECT `cart`.*,`product`.*,category.* FROM `product` INNER  JOIN cart ON `product`.`productid`=`cart`.`productid` INNER JOIN category ON product.catid=category.catid  WHERE  lid='"+lid+"'"
     res=d.select(qry)
     print(qry)
-    print(res)
-    tot = d.selectOne("SELECT SUM(cart.`quantity`*`product`.`price`) as total FROM `cart`,`product` WHERE cart.`productid`=product.`productid` AND `cart`.`lid`='" + str(lid) + "'")
-    print(tot['total'])
 
+    print(res)
     # qr = "DELETE FROM `cart` WHERE `cartid`='" + lid + "'"
     # res = d.delete(qr)
-    return jsonify(status="ok",users=res,total = tot['total'])
+    return jsonify(status="ok",users=res)
 
 @app.route("/and_purchasehistory",methods=['POST'])
 def and_purchasehistory():
@@ -379,36 +329,6 @@ def add_cartadd():
 
 
 
-@app.route("/and_enter_details",methods=['POST'])
-def and_enter_details():
-    place=request.form['place']
-    pin=request.form['pin']
-    post=request.form['post']
-    district=request.form['district']
-    lid=request.form['lid']
-    tot=request.form['tot']
-
-    print(place)
-    db =Db()
-    omid=db.insert("insert into `orderrmain`(`lid`,`totalamt`,`date`,`place`,`pin`,`post`,`district`) VALUES ('"+lid+"','"+str(tot)+"',curdate(),'"+place+"','"+pin+"','"+post+"','"+district+"')")
-    res = db.select("select * from `cart` WHERE `lid`='"+str(lid)+"'")
-    print(res)
-    for i in res:
-        db.insert("INSERT INTO ordersub (`omid`,`productid`,`os_quantity`) values('"+str(omid)+"','"+str(i['productid'])+"','"+str(i['quantity'])+"')")
-        return jsonify(status="ok")
-    # c1=request.form['cartid']
-    # d=Db()
-    # qry="INSERT INTO `cart`(`productid`,`quantity`,`lid`)VALUES('"+p+"','"+qty+"','"+c+"')"
-    # res =d.insert(qry)
-
-    return jsonify(status="ok")
-@app.route("/remove_cart",methods=['POST'])
-def remove_cart():
-    lid=request.form['lid']
-    cartid=request.form['cartid']
-    db =Db()
-    db.delete("delete from cart where cartid = '"+str(cartid)+"' ")
-    return jsonify(status="ok")
 
 
 if __name__ == '__main__':
